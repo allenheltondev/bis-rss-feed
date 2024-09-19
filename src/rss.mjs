@@ -6,7 +6,7 @@ import { save, load, chat } from './bagOfTricks.mjs';
 let feed;
 export const initializeFeed = async () => {
   feed = new RSS({
-    title: "Believe in Serverless Shared Links",
+    title: "Believe in Serverless",
     description: "Find all the cool links shared from the Believe in Serverless community",
     feed_url: "https://believeinserverless.com/rss",
     site_url: "https://believeinserverless.com",
@@ -32,7 +32,7 @@ export const handleLink = async (id, discordMessage, link) => {
     if (relevance) {
       relevance = parseInt(relevance);
     }
-    if (relevance < 7) return;
+    if (relevance < 7) return false;
 
     feed.item({
       title: site.ogTitle,
@@ -46,6 +46,7 @@ export const handleLink = async (id, discordMessage, link) => {
 
     const newFeed = feed.xml({ indent: true });
     await save({ key: 'rss.xml', value: newFeed, isPublic: true });
+    return true;
   } catch (err) {
     console.error(err);
   }

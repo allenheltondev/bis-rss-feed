@@ -33,12 +33,18 @@ async function run() {
 
   client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
-    console.log(message.author.tag);
 
     const links = message.content.match(urlRegex);
     if (links.length === 0) return;
-    links.map((link, index) => handleLink(`${message.id}-${index}`, message, link));
-
+    links.map(async (link, index) => {
+      const linkAccepted = await handleLink(`${message.id}-${index}`, message, link);
+      if (linkAccepted) {
+        const rssEmoji = message.guild.emojis.cache.find(emoji => emoji.name === 'rss');
+        if (rssEmoji) {
+          message.react(rssEmoji);
+        }
+      }
+    });
   });
 
   client.login(process.env.DISCORD_TOKEN);
