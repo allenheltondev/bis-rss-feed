@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits } from 'discord.js';
+import { initializeFeed } from './src/rss.mjs';
 import express from 'express';
 
 const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -13,6 +14,8 @@ async function run() {
   app.listen(8000, () => {
     console.log('Listening on port 8000. This is for the AppRunner health check.');
   });
+
+  await initializeFeed();
 
   const client = new Client({
     intents: [
@@ -29,6 +32,7 @@ async function run() {
 
   client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
+    console.log(JSON.stringify(message));
 
     // TODO: Identify links in message and call rss `handleLink` function to process for relevance
   });
@@ -37,3 +41,4 @@ async function run() {
 }
 
 run();
+
