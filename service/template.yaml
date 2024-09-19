@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Resources for RSS App Runner Service
+
+Parameters:
+  Connection:
+    Type: String
+
+Resources:
+  RSSBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: believeinserverless
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+
+  RSSAppRunnerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ['tasks.apprunner.amazonaws.com']
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: RSSAppRunnerRole
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+              Resource:
+                - !Sub ${RSSBucket.Arn}/*
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource: !GetAtt ClipFinderBucket.Arn
+            - Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource: '*'
+            - Effect: Allow
+              Action: ssm:GetParameter
+              Resource: arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/discord
+
+  RSSAppRunnerService:
+    Type: AWS::AppRunner::Service
+    Properties:
+      SourceConfiguration:
+        AuthenticationConfiguration:
+          ConnectionArn: !Ref Connection
+        AutoDeploymentsEnabled: true
+        CodeRepository:
+          CodeConfiguration:
+            ConfigurationSource: REPOSITORY
+          RepositoryUrl: https://github.com/allenheltondev/bis-rss-feed
+          SourceCodeVersion:
+            Type: BRANCH
+            Value: main
+      InstanceConfiguration:
+        InstanceRoleArn: !GetAtt RSSAppRunnerRole.Arn
