@@ -1,6 +1,8 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import express from 'express';
 
+const urlRegex = /(https?:\/\/[^\s]+)/g;
+
 async function run() {
   if (process.env.ENVIRONMENT !== 'production') {
     const dotenv = await import('dotenv');
@@ -23,6 +25,12 @@ async function run() {
 
   client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
+  });
+
+  client.on('messageCreate', async (message) => {
+    if (message.author.bot) return;
+
+    // TODO: Identify links in message and call rss `handleLink` function to process for relevance
   });
 
   client.login(process.env.DISCORD_TOKEN);

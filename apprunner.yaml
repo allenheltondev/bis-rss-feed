@@ -16,6 +16,8 @@ run:
       value: bis
     - name: ENVIRONMENT
       value: production
+    - name: MODEL_ID
+      value: "anthropic.claude-3-5-sonnet-20240620-v1:0"
   secrets:
     - name: DISCORD_TOKEN
       value-from: discord
