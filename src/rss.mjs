@@ -14,7 +14,7 @@ export const initializeFeed = async () => {
   });
 };
 
-export const handleLink = async (discordMessage, link) => {
+export const handleLink = async (id, discordMessage, link) => {
   try {
     const ogData = await ogs({ url: link });
     const site = {
@@ -32,7 +32,20 @@ export const handleLink = async (discordMessage, link) => {
     if (relevance) {
       relevance = parseInt(relevance);
     }
-    console.log(relevance);
+    if (relevance < 7) return;
+
+    feed.item({
+      title: site.ogTitle,
+      description: site.ogDescription,
+      url: site.url,
+      date: discordMessage.createdAt.toISOString(),
+      author: discordMessage.author.tag,
+      guid: id,
+      categories: [discordMessage.channel.name]
+    });
+
+    const newFeed = feed.xml({ indent: true });
+    await save({ key: 'rss.xml', value: newFeed, isPublic: true });
   } catch (err) {
     console.error(err);
   }

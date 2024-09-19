@@ -36,13 +36,9 @@ async function run() {
     console.log(message.author.tag);
 
     const links = message.content.match(urlRegex);
-    if(links.length === 0) return;
-    
-    for(const link of links) {
-      handleLink(message, link);
-    }
+    if (links.length === 0) return;
+    links.map((link, index) => handleLink(`${message.id}-${index}`, message, link));
 
-    // TODO: Identify links in message and call rss `handleLink` function to process for relevance
   });
 
   client.login(process.env.DISCORD_TOKEN);
