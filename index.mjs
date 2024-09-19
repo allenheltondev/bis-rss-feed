@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { initializeFeed } from './src/rss.mjs';
+import { handleLink } from './src/rss.mjs';
 import express from 'express';
 
 const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -32,7 +33,14 @@ async function run() {
 
   client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
-    console.log(JSON.stringify(message));
+    console.log(message.author.tag);
+
+    const links = message.content.match(urlRegex);
+    if(links.length === 0) return;
+    
+    for(const link of links) {
+      handleLink(message, link);
+    }
 
     // TODO: Identify links in message and call rss `handleLink` function to process for relevance
   });

@@ -1,5 +1,7 @@
 import RSS from 'rss';
-//import { save, load } from './bagOfTricks.mjs';
+import ogs from 'open-graph-scraper';
+import { getRelevancePrompt } from './prompts.mjs';
+import { save, load, chat } from './bagOfTricks.mjs';
 
 let feed;
 export const initializeFeed = async () => {
@@ -13,5 +15,25 @@ export const initializeFeed = async () => {
 };
 
 export const handleLink = async (discordMessage, link) => {
+  try {
+    const ogData = await ogs({ url: link });
+    const site = {
+      url: link,
+      ogTitle: ogData.result.ogTitle,
+      ogDescription: ogData.result.ogDescription,
+      ogType: ogData.result.ogType,
+      ogUrl: ogData.result.ogUrl,
+      ogSiteName: ogData.result.ogSiteName
+    };
 
-}
+    const prompt = getRelevancePrompt(site);
+    const answer = await chat({ chatId: discordMessage.id, message: prompt });
+    let relevance = answer.match(/<relevance>(.*?)<\/relevance>/)[1];
+    if (relevance) {
+      relevance = parseInt(relevance);
+    }
+    console.log(relevance);
+  } catch (err) {
+    console.error(err);
+  }
+};
