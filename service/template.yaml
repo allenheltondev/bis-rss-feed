@@ -43,13 +43,15 @@ Resources:
                 - !Sub ${RSSBucket.Arn}/*
             - Effect: Allow
               Action: s3:ListBucket
-              Resource: !GetAtt ClipFinderBucket.Arn
+              Resource: !GetAtt RSSBucket.Arn
             - Effect: Allow
               Action: bedrock:InvokeModel
               Resource: '*'
             - Effect: Allow
-              Action: ssm:GetParameter
-              Resource: arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/discord
+              Action: ssm:GetParameters
+              Resource:
+                - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/discord
+                - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/momento
 
   RSSAppRunnerService:
     Type: AWS::AppRunner::Service
