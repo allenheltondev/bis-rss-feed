@@ -36,8 +36,10 @@ async function run() {
 
     const links = message.content.match(urlRegex);
     if (links.length === 0) return;
+
+    const recentMessages = await getRecentMessages(message);
     links.map(async (link, index) => {
-      const linkAccepted = await handleLink(`${message.id}-${index}`, message, link);
+      const linkAccepted = await handleLink(`${message.id}-${index}`, message, link, recentMessages);
       if (linkAccepted) {
         const rssEmoji = message.guild.emojis.cache.find(emoji => emoji.name === 'rss');
         if (rssEmoji) {
@@ -49,6 +51,25 @@ async function run() {
 
   client.login(process.env.DISCORD_TOKEN);
 }
+
+const getRecentMessages = async (message) => {
+  const messages = await message.channel.messages.fetch({ limit: 20, before: message.id });
+  if (messages?.length > 0) {
+    const threeMinutesAgo = Date.now() - 3 * 60 * 1000;
+    const recentMessages = messages.filter(m => m.createdTimestamp > threeMinutesAgo)
+      .map(m => {
+        return {
+          user: `${m.author.username}${m.author.globalName ? ` (${m.author.globalName})` : ''}`,
+          message: m.content,
+          timestamp: new Date(m.createdTimestamp).toISOString(),
+          id: m.id
+        };
+      })
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    return recentMessages;
+  }
+  return [];
+};
 
 run();
 

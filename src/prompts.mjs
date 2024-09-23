@@ -11,7 +11,7 @@ export const getRelevancePrompt = (site) => {
 };
 
 export const getContextPrompt = (messages) => {
-  return `Given the following conversation thread from the Believe in Serverless Discord server, determine if there is any relevant context that should be shared when creating an rss feed item for the link. Make your response contain only the description that should be included in the rss feed item.
+  return `Given the following conversation thread from the Believe in Serverless Discord server, determine if there is any relevant context that should be shared when creating an rss feed item for the link. Make your response contain only the description that should be included in the rss feed item. It should be a combination of conversational context and description from the og metadata.
     Conversation:
       ${messages}`;
 };
